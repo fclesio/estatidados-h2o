@@ -90,9 +90,6 @@ rf_model <-
     balance_classes = T,
     seed = seed)
 
-
-
-
 # Informacoes sobre o modelo 
 summary(rf_model)
 

@@ -82,7 +82,6 @@ x = c(
 # Vai ser utilizado para o primeiro nivel do Stacking
 nfolds <- 10
 
-
 # Modelos Base
 # Treino e validação cruzada com GBM
 model_gbm <- 

@@ -48,8 +48,6 @@ layman_brothers.split = h2o.splitFrame(data = layman_brothers.hex,
 layman_brothers.train = layman_brothers.split[[1]]
 layman_brothers.test = layman_brothers.split[[2]]
 
-
-
 # Variavel dependente
 Y = "DEFAULT"
 

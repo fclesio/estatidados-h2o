@@ -157,3 +157,107 @@ x = c(
   ,"economic_indexes__lag5_v18"
   ,"economic_indexes__lag5_v19"  
 )
+
+
+# Treino do modelo
+aml <- h2o.automl(x=x,
+                  y=y,
+                  training_frame = residential_building.train,
+                  max_models = 30,
+                  leaderboard_frame = residential_building.test,
+                  nfolds = 5,
+                  stopping_metric = c("RMSE"),
+                  project_name = "estatidados-auto-ml",
+                  exclude_algos = c("DeepLearning"),
+                  sort_metric = c("RMSE"),
+                  verbosity = "warn",
+                  seed = seed
+                  )
+
+
+# AutoML Leaderboard
+lb <- aml@leaderboard
+
+# Informacoes do Leaderboard
+print(lb, n = nrow(lb))
+
+# Melhor modelo
+aml@leader
+
+# Predicao como melhor modelo
+pred <- h2o.predict(aml@leader, residential_building.test)
+
+# Melhor modelo
+aml@leader
+
+
+#############################################
+# Salvando o modelo para colocar em producao
+#############################################
+
+#########
+# Binario
+#########
+# Diretorio raiz
+ROOT_DIR <- getwd()
+
+# Diretorio do projeto
+PROJECT_DIR <- 
+  'Documents/github/estatidados-h2o/src/10-auto-ml'
+
+artifact_path <- 
+  file.path(ROOT_DIR,
+            PROJECT_DIR
+  )
+
+model_path_object <- 
+  h2o.saveModel(object=aml@leader,
+                path=artifact_path,
+                force=TRUE
+  )
+
+print(model_path_object)
+
+# Carrega o modelo na memoria (Binario)
+saved_model <- h2o.loadModel(model_path_object)
+
+# Predicao com o modelo recarregado em memoria
+# com origem no arquivo binario
+model_predict <- as.data.frame(
+  h2o.predict(object = saved_model,
+              newdata = layman_brothers.test,
+  )
+)
+
+print(model_predict)
+
+##############
+# MOJO & POJO
+##############
+modelfile <- 
+  h2o.download_mojo(aml@leader,
+                    path=artifact_path,
+                    get_genmodel_jar=TRUE)
+
+model_jar_path <- 
+  paste(artifact_path, '/' ,modelfile, sep = "")
+
+
+imported_model <- 
+  h2o.import_mojo(mojo_file_path = model_jar_path)
+
+
+# Predicao com o modelo recarregado em memoria
+# com origem no arquivo MOJO
+model_predict_imported <- as.data.frame(
+  h2o.predict(object = imported_model,
+              newdata = layman_brothers.test,
+  )
+)
+
+print(model_predict_imported)
+
+# Referencias
+# [1] - https://stackoverflow.com/questions/9341635/check-for-installed-packages-before-running-install-packages
+# [2] - http://docs.h2o.ai/h2o/latest-stable/h2o-docs/automl.html
+# [3] - http://docs.h2o.ai/h2o/latest-stable/h2o-docs/parameters.html

@@ -157,3 +157,107 @@ x = c(
   ,"economic_indexes__lag5_v18"
   ,"economic_indexes__lag5_v19"  
 )
+
+
+# Treino do modelo
+model <- 
+  h2o.glm(training_frame=residential_building.train,
+          x=x,
+          y=y,
+          family = "gaussian",
+          lambda = 0,
+          alpha = 1,
+          seed = seed)
+
+# Informacoes sobre o modelo 
+summary(model)
+
+# Predicoes
+pred <- 
+    h2o.predict(object = model,
+                newdata = residential_building.test)
+
+# Importancia das variaveis
+h2o.varimp_plot(model)
+
+# Desempenho do modelo (Curva ROC)
+perf <- 
+  h2o.performance(model,
+                  residential_building.test)
+perf
+
+# Grafico dos Coeficientes com as magnitudes padronizadas
+h2o.std_coef_plot(model)
+
+# Informacooes dos Coeficientes com as magnitudes padronizadas
+model@model$standardized_coefficient_magnitudes
+
+#############################################
+# Salvando o modelo para colocar em producao
+#############################################
+
+#########
+# Binario
+#########
+# Diretorio raiz
+ROOT_DIR <- getwd()
+
+# Diretorio do projeto
+PROJECT_DIR <- 
+  'Documents/github/estatidados-h2o/src/03-glm'
+
+artifact_path <- 
+  file.path(ROOT_DIR,
+            PROJECT_DIR
+            )
+
+model_path_object <- 
+  h2o.saveModel(object=model,
+                path=artifact_path,
+                force=TRUE
+  )
+
+print(model_path_object)
+
+# Carrega o modelo na memoria (Binario)
+saved_model <- h2o.loadModel(model_path_object)
+
+# Predicao com o modelo recarregado em memoria
+# com origem no arquivo binario
+model_predict <- as.data.frame(
+  h2o.predict(object = saved_model,
+              newdata = residential_building.test,
+  )
+)
+
+print(model_predict)
+
+##############
+# MOJO & POJO
+##############
+modelfile <- 
+  h2o.download_mojo(model,
+                    path=artifact_path,
+                    get_genmodel_jar=TRUE)
+
+model_jar_path <- 
+  paste(artifact_path, '/' ,modelfile, sep = "")
+
+
+imported_model <- 
+  h2o.import_mojo(mojo_file_path = model_jar_path)
+
+
+# Predicao com o modelo recarregado em memoria
+# com origem no arquivo MOJO
+model_predict_imported <- as.data.frame(
+  h2o.predict(object = imported_model,
+              newdata = residential_building.test,
+  )
+)
+
+print(model_predict_imported)
+
+# Referencias
+# [1] - https://stackoverflow.com/questions/9341635/check-for-installed-packages-before-running-install-packages
+# [2] - http://docs.h2o.ai/h2o/latest-stable/h2o-docs/data-science/glm.html
