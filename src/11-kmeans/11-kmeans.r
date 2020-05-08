@@ -1,6 +1,6 @@
 if (!require('logger')) install.packages('logger'); library('logger')
 
-# Local directories 
+# Diretorios locais
 ROOT_DIR <- getwd()
 
 PROJECT_DIR <- 
@@ -187,12 +187,12 @@ h2o.exportFile(phones_accelerometer.hex,
                parts = 1)
 log_info("File saved in: {phones_accelerometer_clusters_path}")
 
-#####################################
-# Save model for Productionizing [4]
-#####################################
+#############################################
+# Salvando o modelo para colocar em producao
+#############################################
 
 #########
-# Binary
+# Binario
 #########
 model_path <- 
   get_artifact_path("", MODELS_DIR)
@@ -205,10 +205,10 @@ model_path_object <-
 
 print(model_path_object)
 
-# Load the model (Binary)
+# Carrega o modelo na memoria (Binary)
 saved_model <- h2o.loadModel(model_path_object)
 
-# Predict with the loaded model from binary
+# Predicao com o modelo recarregado em memoria
 kmeans_predict <- as.data.frame(
   h2o.predict(object = saved_model,
               newdata = phones_accelerometer.hex,
@@ -228,19 +228,18 @@ modelfile <-
 model_jar_path <- 
   paste(model_path, modelfile, sep = "")
 
-# We will get the error [4] 
-# No donuts for the K-Means
+# O erro acontece pois o K-Means não tem
+# suporte para MOJO/POJO [4]
 imported_model <- 
   h2o.import_mojo(mojo_file_path = model_jar_path)
 
-# Predict with the loaded model from binary
 # kmeans_predict <- as.data.frame(
 #   h2o.predict(object = imported_model,
 #               newdata = phones_accelerometer.hex,
 #   )
 # )
 
-# References
+# Referencias
 # [0] - Dataset: https://archive.ics.uci.edu/ml/datasets/Heterogeneity+Activity+Recognition
 # [1] - https://towardsdatascience.com/an-efficient-way-to-install-and-load-r-packages-bc53247f058d
 # [2] - https://stackoverflow.com/questions/15956183/how-to-save-a-data-frame-as-csv-to-a-user-selected-location-using-tcltk
@@ -254,5 +253,5 @@ imported_model <-
 # [10] - https://stackoverflow.com/questions/12193779/how-to-write-trycatch-in-r
 # [11] - http://adv-r.had.co.nz/Exceptions-Debugging.html
 
-# Clean up all objects
+# remove todos os objetos da memoria
 h2o.removeAll()
