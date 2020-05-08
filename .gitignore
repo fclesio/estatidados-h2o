@@ -71,3 +71,6 @@ docs/
 # Large files and models
 *.csv
 *.bin
+
+# Remove all logs
+*.log
