@@ -27,11 +27,20 @@ layman_brothers.hex <-
   h2o.importFile(path = layman_brothers_url,
                  destination_frame = "layman_brothers.hex")
 
+
+summary(layman_brothers.hex)
+
 # Como vamos trabalhar com classificacao binaria
 # vamos deixar a nossa variavel dependente como
 # categorica (factor)
 layman_brothers.hex$DEFAULT <- 
   as.factor(layman_brothers.hex$DEFAULT)
+
+layman_brothers.hex$EDUCATION <- 
+  as.factor(layman_brothers.hex$EDUCATION)
+
+layman_brothers.hex$MARRIAGE <- 
+  as.factor(layman_brothers.hex$MARRIAGE)
 
 # Informacoes sobre a base de dados
 summary(layman_brothers.hex)
@@ -47,14 +56,12 @@ layman_brothers.split <-
 layman_brothers.train = layman_brothers.split[[1]]
 layman_brothers.test = layman_brothers.split[[2]]
 
-
 # Variavel dependente
 y = "DEFAULT"
 
 # Variaveis independentes
 x = c(
   "LIMIT_BAL"
-  ,"SEX"
   ,"EDUCATION"
   ,"MARRIAGE"
   ,"AGE"
@@ -83,40 +90,44 @@ x = c(
 nfolds <- 10
 
 # Modelos Base
-# Treino e validação cruzada com GBM
-model_gbm <- 
-  h2o.gbm(x = x,
-          y = y,
-          training_frame = layman_brothers.train,
-          distribution = "bernoulli",
-          max_depth = 3,
-          min_rows = 2,
-          learn_rate = 0.2,
-          nfolds = nfolds,
-          fold_assignment = "Modulo",
-          keep_cross_validation_predictions = TRUE,
-          seed = seed)
-
-# Treino e validação cruzada com Random Forests
-model_rf <- 
+# Treino e validação cruzada com Random Forests (Simples)
+model_rf_1 <- 
   h2o.randomForest(x = x,
                    y = y,
                    training_frame = layman_brothers.train,
+                   ntrees = 50,
+                   stopping_rounds = 10,
+                   stopping_metric = c("AUC"),
+                   binomial_double_trees = TRUE,
                    nfolds = nfolds,
-                   fold_assignment = "Modulo",
-                   keep_cross_validation_predictions = TRUE,
+                   keep_cross_validation_predictions = TRUE,                   
                    seed = seed)
 
-# Treino e validação cruzada com rede Deep Learning
+# Treino e validação cruzada com Random Forests
+model_rf_2 <- 
+  h2o.randomForest(x = x,
+                   y = y,
+                   training_frame = layman_brothers.train,
+                   ntrees = 50,
+                   max_depth = 10,
+                   min_rows = 5,
+                   stopping_rounds = 10,
+                   stopping_metric = c("AUC"),
+                   balance_classes = TRUE,
+                   binomial_double_trees = TRUE,
+                   nfolds = nfolds,
+                   keep_cross_validation_predictions = TRUE,                   
+                   seed = seed)
+
+# Treino e validação cruzada com Deep Learning
 model_dl <- 
   h2o.deeplearning(x = x,
                    y = y,
                    training_frame = layman_brothers.train,
-                   l1 = 0.001,
-                   l2 = 0.001,
-                   hidden = c(200, 200, 200),
+                   l1 = 0.1,
+                   l2 = 0.1,
+                   hidden = c(200, 200),
                    nfolds = nfolds,
-                   fold_assignment = "Modulo",
                    keep_cross_validation_predictions = TRUE,
                    seed = seed)
 
@@ -130,10 +141,9 @@ model_xgb_1 <-
               distribution = "bernoulli",
               ntrees = 50,
               max_depth = 3,
-              min_rows = 2,
+              min_rows = 5,
               learn_rate = 0.2,
               nfolds = nfolds,
-              fold_assignment = "Modulo",
               keep_cross_validation_predictions = TRUE,
               seed = seed)
 
@@ -145,24 +155,19 @@ model_xgb_2 <-
               training_frame = layman_brothers.train,
               distribution = "bernoulli",
               ntrees = 50,
-              max_depth = 8,
-              min_rows = 1,
+              max_depth = 5,
+              min_rows = 5,
               learn_rate = 0.1,
-              sample_rate = 0.7,
-              col_sample_rate = 0.9,
               nfolds = nfolds,
-              fold_assignment = "Modulo",
               keep_cross_validation_predictions = TRUE,
               seed = seed)
-
-
 
 ## Stacked Ensemble
 # Aqui pegamos a lista de modelos base e vamos treinar
 # os modelos treinados anteriormente
 base_models <- 
-  list(model_gbm@model_id,
-       model_rf@model_id,
+  list(model_rf_1@model_id,
+       model_rf_2@model_id,
        model_dl@model_id,  
        model_xgb_1@model_id,
        model_xgb_2@model_id)
@@ -180,7 +185,10 @@ perf <-
 
 
 # Comparação do o modelo base com a base de teste
-get_auc <- function(mm) h2o.auc(h2o.performance(h2o.getModel(mm), newdata = layman_brothers.test))
+get_auc <- 
+  function(mm) h2o.auc(
+    h2o.performance(h2o.getModel(mm),
+                    newdata = layman_brothers.test))
 
 baselearner_aucs <- sapply(base_models, get_auc)
 
@@ -194,7 +202,7 @@ print(sprintf("AUC - Melhor modelo base:  %s", baselearner_best_auc_test))
 print(sprintf("AUC - Model Ensemble:  %s", ensemble_auc_test))
 
 
-v#############################################
+#############################################
 # Salvando o modelo para colocar em producao
 #############################################
 
