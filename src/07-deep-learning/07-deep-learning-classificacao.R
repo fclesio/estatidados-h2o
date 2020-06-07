@@ -33,6 +33,12 @@ layman_brothers.hex <-
 layman_brothers.hex$DEFAULT <- 
   as.factor(layman_brothers.hex$DEFAULT)
 
+layman_brothers.hex$EDUCATION <- 
+  as.factor(layman_brothers.hex$EDUCATION)
+
+layman_brothers.hex$MARRIAGE <- 
+  as.factor(layman_brothers.hex$MARRIAGE)
+
 # Informacoes sobre a base de dados
 summary(layman_brothers.hex)
 
@@ -44,20 +50,18 @@ layman_brothers.split <-
                  ratios = 0.90,
                  seed = seed)
 
-layman_brothers.train = layman_brothers.split[[1]]
-layman_brothers.test = layman_brothers.split[[2]]
+layman_brothers.train <- layman_brothers.split[[1]]
+layman_brothers.test <- layman_brothers.split[[2]]
 
 
 # Variavel dependente
-y = "DEFAULT"
+y <- "DEFAULT"
 
 # Variaveis independentes
 x = c(
   "LIMIT_BAL"
-  ,"SEX"
   ,"EDUCATION"
   ,"MARRIAGE"
-  ,"AGE"
   ,"PAY_0"
   ,"PAY_2"
   ,"PAY_3"
@@ -77,19 +81,33 @@ x = c(
   ,"PAY_AMT5"
   ,"PAY_AMT6")
 
+?h2o.deeplearning
+
+?h2o.deeplearning
+
 # Treino do modelo
 dl_model <- 
   h2o.deeplearning(
     x = x,
+    model_id = "estatidados_ffn",
     y = y,
+    ignore_const_cols = TRUE,
     training_frame = layman_brothers.train,
     validation_frame = layman_brothers.test,
-    hidden=c(10, 10, 10, 10, 10, 10, 10),
-    epochs = 5,
-    balance_classes = T,
-    loss = "Automatic",
-    variable_importances = T,
+    hidden=c(100, 100),
+    epochs = 50,
+    l1 = 0.9,
+    missing_values_handling = c("MeanImputation"),
+    stopping_metric = c("AUC"),
+    rate = 0.2,
+    rate_annealing = 1e-06,
+    categorical_encoding = c("AUTO"),
+    balance_classes = TRUE,
     seed = seed)
+
+
+
+
 
 # Informacoes sobre o modelo 
 summary(dl_model)

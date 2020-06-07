@@ -12,7 +12,7 @@ seed <- 42
 
 h2o.init(nthreads = -1)
 
-h2o.glm
+?h2o.glm
 
 demo(h2o.glm)
 
@@ -36,8 +36,7 @@ education_stats = h2o.group_by(data = layman_brothers.hex,
                                nrow("EDUCATION"),
                                gb.control=list(na.methods="rm"))
 
-education_stats.R = as.data.frame(education_stats)
-education_stats.R
+education_stats
 
 
 # Construindo base de Treino e Teste

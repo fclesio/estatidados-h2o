@@ -163,10 +163,9 @@ x = c(
 model <- 
   h2o.gbm(x = x,
           y = y,
-          balance_classes = T,
           training_frame = residential_building.train,
           validation_frame = residential_building.test,
-          ntrees = 100,
+          ntrees = 3000,
           max_depth = 5,
           model_id = "gbm_model",
           distribution = "AUTO",

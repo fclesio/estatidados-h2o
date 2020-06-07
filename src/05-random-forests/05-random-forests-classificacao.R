@@ -27,6 +27,8 @@ layman_brothers.hex <-
   h2o.importFile(path = layman_brothers_url,
                  destination_frame = "layman_brothers.hex")
 
+
+
 # Como vamos trabalhar com classificacao binaria
 # vamos deixar a nossa variavel dependente como
 # categorica (factor)
@@ -44,9 +46,8 @@ layman_brothers.split <-
                  ratios = 0.90,
                  seed = seed)
 
-layman_brothers.train = layman_brothers.split[[1]]
-layman_brothers.test = layman_brothers.split[[2]]
-
+layman_brothers.train <- layman_brothers.split[[1]]
+layman_brothers.test <- layman_brothers.split[[2]]
 
 # Variavel dependente
 y = "DEFAULT"
@@ -54,10 +55,8 @@ y = "DEFAULT"
 # Variaveis independentes
 x = c(
   "LIMIT_BAL"
-  ,"SEX"
   ,"EDUCATION"
   ,"MARRIAGE"
-  ,"AGE"
   ,"PAY_0"
   ,"PAY_2"
   ,"PAY_3"
@@ -84,9 +83,11 @@ rf_model <-
     y = y,
     training_frame = layman_brothers.train,
     validation_frame = layman_brothers.test,
-    ntrees = 150,
-    max_depth = 5,
-    model_id = "rf_model",
+    ntrees = 900,
+    max_depth = 10,
+    stopping_metric = c("AUC"),
+    distribution = c("bernoulli"),
+    model_id = "rf_model_estatidados_sem_feature_eng",
     balance_classes = T,
     seed = seed)
 

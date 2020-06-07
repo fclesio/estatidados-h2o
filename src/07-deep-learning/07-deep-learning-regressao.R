@@ -165,10 +165,8 @@ model <-
     y = y,
     training_frame = residential_building.train,
     validation_frame = residential_building.test,
-    hidden=c(10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10),
+    hidden=c(10, 10, 10),
     epochs = 5,
-    loss = "Automatic",
-    variable_importances = T,
     seed = seed)
 
 # Informacoes sobre o modelo 

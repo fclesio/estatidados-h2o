@@ -44,15 +44,15 @@ residential_building.split<-
                  ratios = 0.90,
                  seed = seed)
 
-residential_building.train = residential_building.split[[1]]
-residential_building.test = residential_building.split[[2]]
+residential_building.train <- residential_building.split[[1]]
+residential_building.test <- residential_building.split[[2]]
 
 
 # Variavel dependente
-y = "out_v1"
+y <- "out_v1"
 
 # Variaveis independentes
-x = c(
+x <- c(
   "physical_financial_v1"
   ,"physical_financial_v2"
   ,"physical_financial_v3"
@@ -157,3 +157,8 @@ x = c(
   ,"economic_indexes__lag5_v18"
   ,"economic_indexes__lag5_v19"  
 )
+
+
+x
+
+

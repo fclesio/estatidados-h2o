@@ -33,6 +33,12 @@ layman_brothers.hex <-
 layman_brothers.hex$DEFAULT <- 
   as.factor(layman_brothers.hex$DEFAULT)
 
+layman_brothers.hex$EDUCATION <- 
+  as.factor(layman_brothers.hex$EDUCATION)
+
+layman_brothers.hex$MARRIAGE <- 
+  as.factor(layman_brothers.hex$MARRIAGE)
+
 # Informacoes sobre a base de dados
 summary(layman_brothers.hex)
 
@@ -54,7 +60,6 @@ y = "DEFAULT"
 # Variaveis independentes
 x = c(
   "LIMIT_BAL"
-  ,"SEX"
   ,"EDUCATION"
   ,"MARRIAGE"
   ,"AGE"
@@ -84,9 +89,9 @@ gbm_model <-
           balance_classes = T,
           training_frame = layman_brothers.train,
           validation_frame = layman_brothers.test,
-          ntrees = 100,
-          max_depth = 5,
-          model_id = "gbm_model",
+          ntrees = 900,
+          max_depth = 10,
+          model_id = "gbm_estatidados_no_feature_engineering",
           distribution = "bernoulli",
           learn_rate = .1,
           min_rows = 2,

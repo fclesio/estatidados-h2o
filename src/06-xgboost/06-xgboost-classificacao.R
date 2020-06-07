@@ -27,11 +27,20 @@ layman_brothers.hex <-
   h2o.importFile(path = layman_brothers_url,
                  destination_frame = "layman_brothers.hex")
 
+summary(layman_brothers.hex)
+
 # Como vamos trabalhar com classificacao binaria
 # vamos deixar a nossa variavel dependente como
 # categorica (factor)
 layman_brothers.hex$DEFAULT <- 
   as.factor(layman_brothers.hex$DEFAULT)
+
+layman_brothers.hex$EDUCATION <- 
+  as.factor(layman_brothers.hex$EDUCATION)
+
+layman_brothers.hex$MARRIAGE <- 
+  as.factor(layman_brothers.hex$MARRIAGE)
+
 
 # Informacoes sobre a base de dados
 summary(layman_brothers.hex)
@@ -44,8 +53,8 @@ layman_brothers.split <-
                  ratios = 0.90,
                  seed = seed)
 
-layman_brothers.train = layman_brothers.split[[1]]
-layman_brothers.test = layman_brothers.split[[2]]
+layman_brothers.train <- layman_brothers.split[[1]]
+layman_brothers.test <- layman_brothers.split[[2]]
 
 
 # Variavel dependente
@@ -54,10 +63,8 @@ y = "DEFAULT"
 # Variaveis independentes
 x = c(
   "LIMIT_BAL"
-  ,"SEX"
   ,"EDUCATION"
   ,"MARRIAGE"
-  ,"AGE"
   ,"PAY_0"
   ,"PAY_2"
   ,"PAY_3"
@@ -81,10 +88,19 @@ x = c(
 model_xgb <- 
   h2o.xgboost(x = x,
               y = y,
+              stopping_metric = c("AUC"),
+              distribution = c("bernoulli"),
+              categorical_encoding = c("AUTO"),
+              ntrees = 1000,
+              max_depth = 6,
+              min_rows = 5,
+              learn_rate = 0.1,
+              calibrate_model = FALSE,
+              max_bins = 256,
+              reg_lambda = 1,
+              backend = c("cpu"),
               training_frame = layman_brothers.train,
               validation_frame = layman_brothers.test,
-              booster = "dart",
-              normalize_type = "tree",
               seed = seed)
 
 
@@ -97,6 +113,9 @@ summary(model_xgb)
 pred <- 
   h2o.predict(object = model_xgb,
               newdata = layman_brothers.test)
+
+
+pred
 
 # Sumario da classe 1 (DEFAULT)
 summary(pred$p1)

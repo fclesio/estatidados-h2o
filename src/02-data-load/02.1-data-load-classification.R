@@ -41,11 +41,11 @@ summary(layman_brothers.hex)
 # e 10% para teste
 layman_brothers.split <-
   h2o.splitFrame(data = layman_brothers.hex,
-                                       ratios = 0.90,
-                                       seed = seed)
+                 ratios = 0.90,
+                 seed = seed)
 
-layman_brothers.train = layman_brothers.split[[1]]
-layman_brothers.test = layman_brothers.split[[2]]
+layman_brothers.train <- layman_brothers.split[[1]]
+layman_brothers.test <- layman_brothers.split[[2]]
 
 
 # Variavel dependente
